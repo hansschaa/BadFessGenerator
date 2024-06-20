@@ -30,7 +30,7 @@ public class BadFessGenerator {
     public static List<SokobanBoard> randomBoards;
     public static List<SokobanBoard> solved;
     public static List<SokobanBoard> noSolved;
-    public static int selectedID = 1;
+    public static int selectedID = 2;
     public static int numNewBoards = 10; 
     public static int randomMovesTimes = 2;
     
@@ -39,10 +39,9 @@ public class BadFessGenerator {
      */
     public static void main(String[] args) throws IOException {
         String filePath = "newFessBoards.txt"; 
-
         boards = new ArrayList<>();
         solved = new ArrayList<>();
-        noSolved = new ArrayList<>();
+        noSolved = new ArrayList<>();  
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             StringBuilder boardContent = new StringBuilder();
@@ -59,11 +58,9 @@ public class BadFessGenerator {
                 
                     id = Integer.parseInt(line.substring(4).trim());
                 } else {
-                   
                     boardContent.append(line).append("\n");
                 }
             }
-
 
             if (id != -1 && boardContent.length() > 0) {
                 SokobanBoard board = new SokobanBoard(id, boardContent.toString());
@@ -73,32 +70,37 @@ public class BadFessGenerator {
             e.printStackTrace();
         }
 
-        //Select board
-        SokobanBoard selectedBoard = boards.get(selectedID);
-        System.out.println("-> Selected Board");
-        System.out.println(selectedBoard.getBoard());
-        char[][] filledBoard = Fill(selectedBoard.getBoard());
-        String filledBoardString = convertBoardToString(filledBoard);
-        
-        // Filled
-        System.out.println("-> Filled Board");
-        System.out.println(filledBoardString);
-        
-        //Generate board
-        GenerateRandomBoards(filledBoardString); 
-        
-        //Print random boards
-        PrintBoards(randomBoards);
-        
-        //Solve boards
-        Execute();
-        
-        //Print Info
-        System.out.println("Se resuelven");
-        PrintBoards(solved);
-        
-        System.out.println("No se resuelven");
-        PrintBoards(noSolved);
+        for(int i = 0 ; i < boards.size(); i++){
+
+            randomBoards = new ArrayList<>();
+            
+            //Select board
+            SokobanBoard selectedBoard = boards.get(i);
+            System.out.println("-> Selected Board");
+            System.out.println(selectedBoard.getBoard());
+            char[][] filledBoard = Fill(selectedBoard.getBoard());
+            String filledBoardString = convertBoardToString(filledBoard);
+
+            // Filled
+            System.out.println("-> Filled Board");
+            System.out.println(filledBoardString);
+
+            //Generate board
+            GenerateRandomBoards(filledBoardString); 
+
+            //Print random boards
+            PrintBoards(randomBoards);
+
+            //Solve boards
+            Execute();
+
+            //Print Info
+            /*System.out.println("Se resuelven");
+            PrintBoards(solved);
+
+            System.out.println("No se resuelven");
+            PrintBoards(noSolved);*/
+        }
         
         //Export to Excel
         ExportToExcel("results.xlsx");
@@ -176,12 +178,9 @@ public class BadFessGenerator {
             System.out.println(board.getBoard());
             System.out.println();
         }
-    
     }
 
     private static void GenerateRandomBoards(String board) {
-
-        randomBoards = new ArrayList<>();
 
         for (int i = 0; i < numNewBoards; i++) {
             String newBoard = moveObjectsRandomly(board, randomMovesTimes); 
@@ -189,25 +188,6 @@ public class BadFessGenerator {
             SokobanBoard sokobanBoard = new SokobanBoard(i + 1, newBoard);
             randomBoards.add(sokobanBoard);
         }
-
-        /*System.out.println("Aleatorios");
-        // Mostrar los tableros generados
-        for (SokobanBoard sokobanBoard : randomBoards) {
-            System.out.println(sokobanBoard.getBoard());
-            System.out.println();
-        }*/
-
-        
-        //Init the loop for test in fess
-        /*for (Board board : boards) {
-            try {
-                // Llamar al .exe para cada tablero
-                callExeForBoard(board);
-            } catch (IOException e) {
-                System.err.println("Error ejecutando el .exe para el tablero: " + board);
-                e.printStackTrace();
-            }
-        }*/
     }
     
     public static void Execute(){
@@ -239,7 +219,7 @@ public class BadFessGenerator {
     
     private static void callExeForBoard(File boardFile, SokobanBoard sokobanBoard) throws IOException {
         
-        System.out.println("callExeForBoard");
+        System.out.println("-----------------------------------");
         
         // Definir el comando y los argumentos necesarios
         String exePath = "fess.exe";
@@ -277,7 +257,7 @@ public class BadFessGenerator {
         try {
             int exitCode = process.waitFor();
             if (exitCode == 0) {
-                System.out.println("El archivo " + boardFile.getName() + " fue resuelto correctamente.");
+                System.out.println("Programa finalizado");
             } else {
                 System.out.println("Hubo un error resolviendo el archivo " + boardFile.getName() + ". Código de salida: " + exitCode);
             }
@@ -427,6 +407,26 @@ public class BadFessGenerator {
             }
         }
         return null; // Character not found
+    }
+    
+    public static int GetIDCount(String filePath){
+        String searchString = "ID";
+        int count = 0;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                int index = 0;
+                if(line.contains(searchString))
+                    count++;
+            }
+        } catch (IOException e) {
+            System.err.println("Error leyendo el archivo: " + e.getMessage());
+        }
+
+        System.out.println("La cadena \"" + searchString + "\" aparece " + count + " veces en el archivo " + filePath);
+        
+        return count;
     }
 }
     

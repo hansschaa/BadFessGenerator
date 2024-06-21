@@ -15,7 +15,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 
@@ -31,7 +33,7 @@ public class BadFessGenerator {
     public static List<SokobanBoard> noSolved;
     public static int selectedID = 2;
     public static int numNewBoards = 2; 
-    public static int randomMovesTimes = 2;
+    public static int randomMovesTimes = 1;
     private static final int[][] dirs = {
         {-1, 0}, {-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}
     };
@@ -78,7 +80,7 @@ public class BadFessGenerator {
             
             //Select board
             SokobanBoard selectedBoard = boards.get(i);
-            System.out.println("-> Selected Board");
+            System.out.println("-> Selected Board: " + i);
             System.out.println(selectedBoard.getBoard());
             char[][] filledBoard = Fill(selectedBoard.getBoard());
             String filledBoardString = convertBoardToString(filledBoard);
@@ -103,9 +105,15 @@ public class BadFessGenerator {
 
             System.out.println("No se resuelven");
             PrintBoards(noSolved);*/
+            
+            if(i%2==0){
+                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+                ExportToExcel("results_"+ timeStamp + "_" + i + ".xlsx");
+            }
         }
         
         //Export to Excel
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
         ExportToExcel("results.xlsx");
     }
     

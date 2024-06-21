@@ -11,9 +11,17 @@ package com.mycompany.badfessgenerator;
 public class Vec {
     int i;
     int j;
+    char type;
+    
+    public Vec(int i, int j, char type){
+        this.i = i;
+        this.j = j;
+        this.type = type;
+    }
     
     public Vec(int i, int j){
         this.i = i;
         this.j = j;
+        this.type = type;
     }
 }

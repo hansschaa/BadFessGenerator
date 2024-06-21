@@ -32,12 +32,15 @@ public class BadFessGenerator {
     public static int selectedID = 2;
     public static int numNewBoards = 2; 
     public static int randomMovesTimes = 2;
+    private static final int[][] dirs = {
+        {-1, 0}, {-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}
+    };
     
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-        String filePath = "mini.txt"; 
+        String filePath = "mini2.txt"; 
         boards = new ArrayList<>();
         solved = new ArrayList<>();
         noSolved = new ArrayList<>();  
@@ -85,7 +88,7 @@ public class BadFessGenerator {
             //System.out.println(filledBoardString);
 
             //Generate board
-            GenerateRandomBoards(filledBoardString); 
+            GenerateRandomBoards(filledBoardString);
 
             //Print random boards
             //PrintBoards(randomBoards);
@@ -201,11 +204,16 @@ public class BadFessGenerator {
     }
 
     private static void GenerateRandomBoards(String board) {
-
+        SokobanBoard sokobanBoard = null;
+        List<String> boardsCache = new ArrayList<String>();
         for (int i = 0; i < numNewBoards; i++) {
-            String newBoard = moveObjectsRandomly(board, randomMovesTimes); 
-
-            SokobanBoard sokobanBoard = new SokobanBoard(i + 1, newBoard);
+            //String newBoard = RandomlyMove(board, randomMovesTimes); 
+            do{
+                String newBoard = NearRandomlyMove(board, randomMovesTimes);
+                sokobanBoard = new SokobanBoard(i + 1, newBoard);
+            }while(boardsCache.contains(sokobanBoard.getBoard()));
+            
+            boardsCache.add(sokobanBoard.getBoard());
             randomBoards.add(sokobanBoard);
         }
     }
@@ -301,8 +309,80 @@ public class BadFessGenerator {
         }
     }
     
+    public static String NearRandomlyMove(String mBoard, int moves){
+        Random random = new Random();
+        String[] board = mBoard.split("\n");
+        
+        int rows = board.length;
+        int cols = board[0].length();
+        char[][] matrix = new char[rows][cols];
+
+        for (int i = 0; i < rows; i++) {
+            matrix[i] = board[i].toCharArray();
+        }
+        
+        for (int i = 0; i < moves; i++) {
+            List<Vec> boxandgoals = new ArrayList<>();
+            for (int j = 0; j < rows; j++) {
+                for (int k = 0; k < cols; k++) {
+                    if (matrix[j][k] == '$' || matrix[j][k] == '.' || matrix[j][k] == '*') {
+                        boxandgoals.add(new Vec(j,k, matrix[j][k]));
+                    }
+                }
+            }
+            
+            List<Vec> emptyNeighboorsList = new ArrayList<>();
+            Vec objectSpace = null;
+            do{
+                int randomIndex = random.nextInt(boxandgoals.size()); 
+                objectSpace = boxandgoals.get(randomIndex);
+                getEmptyNeighbors(objectSpace, matrix, emptyNeighboorsList);
+                
+            }while(emptyNeighboorsList.isEmpty());
+            
+            Vec emptySpace = emptyNeighboorsList.get(random.nextInt(0, emptyNeighboorsList.size()));
+            
+            switch (objectSpace.type) {
+                case '*':
+                    matrix[objectSpace.i][objectSpace.j] = '.';
+                    matrix[emptySpace.i][emptySpace.j] = '$';
+                    break;
+                case '$':
+                    matrix[objectSpace.i][objectSpace.j] = ' ';
+                    matrix[emptySpace.i][emptySpace.j] = '$';
+                    break;
+                case '.':
+                    matrix[objectSpace.i][objectSpace.j] = ' ';
+                    matrix[emptySpace.i][emptySpace.j] = '.';
+                    break;
+                default:
+                    System.out.println("No se conoce el elemento seleccionado para ser cmabiado");
+                    break;
+            }
+        }
+        
+        String newBoard = convertBoardToString(matrix).replace('-', ' ');
+        return newBoard;
+    }
+    
+    private static void getEmptyNeighbors(Vec vec, char[][] matrix,List<Vec> emptyNeighboorsList) {
+     
+
+        for (int[] dir : dirs) {
+            int newI = vec.i + dir[0];
+            int newJ = vec.j + dir[1];
+            if (isInBounds(new Vec(newI, newJ), matrix) && matrix[newI][newJ] == '-') {
+                emptyNeighboorsList.add(new Vec(newI, newJ));
+            }
+        }
+    }
+
+    private static boolean isInBounds(Vec vec, char[][] matrix) {
+        return vec.i >= 0 && vec.i < matrix.length && vec.j >= 0 && vec.j < matrix[0].length;
+    }
+    
     // Método para mover aleatoriamente las cajas o metas en el tablero
-    public static String moveObjectsRandomly(String mBoard, int moves) {
+    public static String RandomlyMove(String mBoard, int moves) {
         Random random = new Random();
         String[] board = mBoard.split("\n");
         

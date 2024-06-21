@@ -42,7 +42,7 @@ public class BadFessGenerator {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-        String filePath = "mini2.txt"; 
+        String filePath = "mini3.txt"; 
         boards = new ArrayList<>();
         solved = new ArrayList<>();
         noSolved = new ArrayList<>();  
@@ -90,7 +90,14 @@ public class BadFessGenerator {
             //System.out.println(filledBoardString);
 
             //Generate board
-            GenerateRandomBoards(filledBoardString);
+            boolean success = GenerateRandomBoards(filledBoardString);
+            if(!success){
+                System.out.println("-> Tablero " + (i+1) + " sin espacios libres");
+                continue;
+            }
+            else{
+                System.out.println("-> Tableros aleatorios de ID " + (i+1) + " creados exitosamente");
+            }
 
             //Print random boards
             //PrintBoards(randomBoards);
@@ -211,19 +218,27 @@ public class BadFessGenerator {
         }
     }
 
-    private static void GenerateRandomBoards(String board) {
+    private static boolean GenerateRandomBoards(String board) {
         SokobanBoard sokobanBoard = null;
         List<String> boardsCache = new ArrayList<String>();
+        
+        int nearRandomlyMoveAttemps = 10;
+        
         for (int i = 0; i < numNewBoards; i++) {
             //String newBoard = RandomlyMove(board, randomMovesTimes); 
             do{
-                String newBoard = NearRandomlyMove(board, randomMovesTimes);
+                String newBoard = NearRandomlyMove(board, randomMovesTimes, nearRandomlyMoveAttemps);
+                if(newBoard.equals(""))
+                    return false;
+                
                 sokobanBoard = new SokobanBoard(i + 1, newBoard);
             }while(boardsCache.contains(sokobanBoard.getBoard()));
             
             boardsCache.add(sokobanBoard.getBoard());
             randomBoards.add(sokobanBoard);
         }
+        
+        return true;
     }
     
     public static void Execute(){
@@ -317,7 +332,7 @@ public class BadFessGenerator {
         }
     }
     
-    public static String NearRandomlyMove(String mBoard, int moves){
+    public static String NearRandomlyMove(String mBoard, int moves, int maxAttemps){
         Random random = new Random();
         String[] board = mBoard.split("\n");
         
@@ -341,11 +356,15 @@ public class BadFessGenerator {
             
             List<Vec> emptyNeighboorsList = new ArrayList<>();
             Vec objectSpace = null;
+            int currentAttemps = 0;
             do{
+                if(currentAttemps > maxAttemps)
+                    return "";
+                
                 int randomIndex = random.nextInt(boxandgoals.size()); 
                 objectSpace = boxandgoals.get(randomIndex);
                 getEmptyNeighbors(objectSpace, matrix, emptyNeighboorsList);
-                
+                currentAttemps++;
             }while(emptyNeighboorsList.isEmpty());
             
             Vec emptySpace = emptyNeighboorsList.get(random.nextInt(0, emptyNeighboorsList.size()));

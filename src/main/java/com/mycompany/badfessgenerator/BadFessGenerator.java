@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Random;
 
 
-
 /**
  *
  * @author Hans
@@ -31,14 +30,14 @@ public class BadFessGenerator {
     public static List<SokobanBoard> solved;
     public static List<SokobanBoard> noSolved;
     public static int selectedID = 2;
-    public static int numNewBoards = 10; 
+    public static int numNewBoards = 2; 
     public static int randomMovesTimes = 2;
     
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-        String filePath = "newFessBoards.txt"; 
+        String filePath = "mini.txt"; 
         boards = new ArrayList<>();
         solved = new ArrayList<>();
         noSolved = new ArrayList<>();  
@@ -71,7 +70,7 @@ public class BadFessGenerator {
         }
 
         for(int i = 0 ; i < boards.size(); i++){
-
+            System.out.println("-----------------------------------");
             randomBoards = new ArrayList<>();
             
             //Select board
@@ -82,18 +81,19 @@ public class BadFessGenerator {
             String filledBoardString = convertBoardToString(filledBoard);
 
             // Filled
-            System.out.println("-> Filled Board");
-            System.out.println(filledBoardString);
+            //System.out.println("-> Filled Board");
+            //System.out.println(filledBoardString);
 
             //Generate board
             GenerateRandomBoards(filledBoardString); 
 
             //Print random boards
-            PrintBoards(randomBoards);
+            //PrintBoards(randomBoards);
 
             //Solve boards
+            
             Execute();
-
+            System.out.println("-----------------------------------");
             //Print Info
             /*System.out.println("Se resuelven");
             PrintBoards(solved);
@@ -107,6 +107,9 @@ public class BadFessGenerator {
     }
     
     private static void ExportToExcel(String filePath) throws IOException {
+        
+        System.out.println("-> Export to excel: " + filePath);
+        
         Workbook workbook = new XSSFWorkbook();
 
         // Hoja para los niveles con solución
@@ -115,12 +118,25 @@ public class BadFessGenerator {
         // Definir encabezados de columna para niveles con solución
         Row headerRow1 = sheet1.createRow(0);
         headerRow1.createCell(0).setCellValue("Mapa");
+        headerRow1.createCell(1).setCellValue("LURD");
+        headerRow1.createCell(2).setCellValue("MOVES");
+        headerRow1.createCell(3).setCellValue("PUSHES");
+        
         int rowNumSheet1 = 1; // Empezar en la segunda fila después del encabezado
         for (SokobanBoard level : solved) {
             
             Row row = sheet1.createRow(rowNumSheet1++);
             Cell cell = row.createCell(0);
             cell.setCellValue(level.getBoard());
+            
+            cell = row.createCell(1);
+            cell.setCellValue(level.message);
+            
+            cell = row.createCell(2);
+            cell.setCellValue(level.GetMovements());
+            
+            cell = row.createCell(3);
+            cell.setCellValue(level.GetPushes());
         }
 
         // Hoja para los niveles sin solución
@@ -142,7 +158,11 @@ public class BadFessGenerator {
         }
 
         try (FileOutputStream fos = new FileOutputStream(filePath)) {
+            System.out.println("-> Excel exported succesfully: " + filePath);
             workbook.write(fos);
+        }
+        catch(Exception e){
+            System.out.println("Export Error: " + e.getMessage());
         }
 
         workbook.close();
@@ -218,14 +238,11 @@ public class BadFessGenerator {
     }
     
     private static void callExeForBoard(File boardFile, SokobanBoard sokobanBoard) throws IOException {
-        
-        System.out.println("-----------------------------------");
-        
         // Definir el comando y los argumentos necesarios
         String exePath = "fess.exe";
 
         // Crear el proceso
-        ProcessBuilder processBuilder = new ProcessBuilder(exePath, boardFile.getAbsolutePath(), "-time 1");
+        ProcessBuilder processBuilder = new ProcessBuilder(exePath, boardFile.getAbsolutePath());
         List<String> command = processBuilder.command();
         StringBuilder commandString = new StringBuilder();
         for (String part : command) {
@@ -241,10 +258,12 @@ public class BadFessGenerator {
         String line;
         while ((line = reader.readLine()) != null) {
             //Checking
-            if(line.contains("SOLVED")){
+            if(line.contains("LURD")){
                 System.out.println("SOLVED!");
+                sokobanBoard.message = line.replace("LURD:", "");
                 solved.add(sokobanBoard);
             }
+            
             else if(line.contains("ERROR")){
                 System.out.println("ERROR!");
                 sokobanBoard.message =line;

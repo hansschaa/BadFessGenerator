@@ -35,4 +35,19 @@ class SokobanBoard {
     void Clean() {
         board.replace('-', ' ');
     }
+
+    public int GetMovements() {
+        return message.length();
+    }
+    
+    public int GetPushes() {
+        int count = 0;
+        for (int i = 0; i < message.length(); i++) {
+            char c = message.charAt(i);
+            if (Character.isUpperCase(c)) {
+                count++;
+            }
+        }
+        return count;
+    }
 }

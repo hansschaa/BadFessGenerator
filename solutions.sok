@@ -1,18 +1,20 @@
-Festival 3.1 solution file
+Festival 3.1 Test Version solution file
 ===========================
-Collection: C:\Users\Hans\Desktop\Test\BadFessGenerator\test\board_4.txt
+Collection: C:\Users\Hans\Desktop\Test\BadFessGenerator\test\board_2.txt
 
 Level 1
 
-  ##############
-  #   #        #
-  # $ $ $ $ #$ #
-  # #$# ###  $ #
-  # # .....##$##
-  #  ...+..  $ #
-####$# ....# # #
-#    #### # $$ #
-#$$#  $ $  $ # #
-#   ..#        #
-################
+   ########   
+   #      #   
+   # $##  ####
+####  $ $    #
+#   $#. ##$$ #
+#  # ..*.*+# #
+# #  ..*..#$ #
+# $ ##..#$   #
+#    $ $# ####
+#### .#   #   
+   #$   # #   
+   #      #   
+   ########   
 
